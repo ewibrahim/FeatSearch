@@ -5,17 +5,13 @@ const searchEndpoint = 'https://api.spotify.com/v1/search';
 let accessToken = '';
 
 async function getAccessToken() {
-  const response = await fetch(authEndpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
-    },
-    body: 'grant_type=client_credentials'
+  const response = await fetch('https://delicate-wood-ff25.elwalid-ibr9259.workers.dev/getAccessToken', {
+    method: 'GET',
   });
   const data = await response.json();
   accessToken = data.access_token;
 }
+
 
 async function searchFeaturedTracks(artistName) {
   const query = `"${artistName}"`;
