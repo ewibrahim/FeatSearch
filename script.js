@@ -21,7 +21,10 @@ async function searchFeaturedTracks(artistName) {
     const mainArtistNameLowerCase = track.artists[0].name.toLowerCase();
     const isFeaturedInName = trackNameLowerCase.includes(`feat. ${artistNameLowerCase}`) ||
                              trackNameLowerCase.includes(`ft. ${artistNameLowerCase}`) ||
-                             trackNameLowerCase.includes(`featuring ${artistNameLowerCase}`);
+                             trackNameLowerCase.includes(`featuring ${artistNameLowerCase}`)
+                             trackNameLowerCase.includes(`with ${artistNameLowerCase}`) ||
+                             trackNameLowerCase.includes(`presenting ${artistNameLowerCase}`) ||
+                             trackNameLowerCase.includes(`introducing ${artistNameLowerCase}`);
 
     // Check if the given artist is among the artists of the track and not the main artist
     const isFeaturedArtist = track.artists.some(
