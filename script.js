@@ -64,8 +64,6 @@ async function search(query, type, limit = 50) {
   return allItems.slice(0, maxItems);
 }
 
-
-
 async function searchArtist(query) {
   const artists = await search(query, 'artist');
   const queryLowerCase = query.toLowerCase();
@@ -78,8 +76,6 @@ async function searchArtist(query) {
   // If an exact match is found, return it; otherwise, return null
   return exactMatchArtist || null;
 }
-
-
 
 async function getArtistTracks(artistId) {
   const response = await fetch(`https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=US`, {
@@ -94,14 +90,29 @@ async function getArtistTracks(artistId) {
 function displayTracks(tracks) {
   const results = $('#results');
   results.empty();
-  tracks.forEach((track, index) => {
+
+  // Remove duplicates and keep the earliest release date
+  const uniqueTracks = tracks.reduce((accumulator, currentTrack) => {
+    const existingTrack = accumulator.find(track => track.name === currentTrack.name);
+    if (!existingTrack) {
+      accumulator.push(currentTrack);
+    } else {
+      const currentTrackDate = new Date(currentTrack.album.release_date);
+      const existingTrackDate = new Date(existingTrack.album.release_date);
+      if (currentTrackDate < existingTrackDate) {
+        existingTrack.album.release_date = currentTrack.album.release_date;
+      }
+    }
+    return accumulator;
+  }, []);
+
+  uniqueTracks.forEach((track, index) => {
     const listItem = $('<li class="list-group-item"></li>');
     listItem.append(`<span>${index + 1}. ${track.artists[0].name} - ${track.name} </span>`);
     listItem.append(`<span>(${track.album.release_date})</span>`);
     results.append(listItem);
   });
 }
-
 
 async function performSearch(event) {
   event.preventDefault();
