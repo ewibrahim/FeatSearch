@@ -1,5 +1,3 @@
-const clientId = '59e8520dd25340708dda919cbf49fac5';
-const clientSecret = '2b31fe3c899647fcaace1a787a23e686';
 const authEndpoint = 'https://accounts.spotify.com/api/token';
 const searchEndpoint = 'https://api.spotify.com/v1/search';
 let accessToken = '';
