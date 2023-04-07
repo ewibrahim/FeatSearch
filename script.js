@@ -35,7 +35,7 @@ async function searchFeaturedTracks(artistName) {
 
     const isFeaturedArtist = track.artists.some((artist, index) => {
       const artistNameInListLowerCase = artist.name.toLowerCase();
-      return artistNameInListLowerCase === artistNameLowerCase && index !== 0;
+      return artistNameInListLowerCase.includes(artistNameLowerCase) && index !== 0;
     });
 
     const appearsInTitleOrArtists = collaborationKeywords.some(keyword => trackNameLowerCase.includes(keyword)) || isFeaturedArtist;
@@ -49,6 +49,7 @@ async function searchFeaturedTracks(artistName) {
 
   return sortedTracks;
 }
+
 
 async function search(query, type, limit = 50) {
   let allItems = [];
