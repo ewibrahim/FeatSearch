@@ -24,7 +24,8 @@ async function searchFeaturedTracks(artistName) {
   const allTracks = [];
 
   for (const keyword of collaborationKeywords) {
-    const tracks = await search(keyword, 'track', 1000);
+    const combinedQuery = `"${keyword}" AND "${artistName}"`;
+    const tracks = await search(combinedQuery, 'track', 1000);
     allTracks.push(...tracks);
   }
 
@@ -39,8 +40,9 @@ async function searchFeaturedTracks(artistName) {
 
     const appearsInTitleOrArtists = collaborationKeywords.some(keyword => trackNameLowerCase.includes(keyword)) || isFeaturedArtist;
     const isNotAlbumArtist = mainArtistNameLowerCase !== artistNameLowerCase;
+    const isExactMatch = trackNameLowerCase.includes(artistNameLowerCase);
 
-    return appearsInTitleOrArtists && isNotAlbumArtist;
+    return appearsInTitleOrArtists && isNotAlbumArtist && isExactMatch;
   });
 
   const uniqueTracks = Array.from(new Set(filteredTracks.map(JSON.stringify))).map(JSON.parse);
