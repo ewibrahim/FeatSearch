@@ -40,9 +40,8 @@ async function searchFeaturedTracks(artistName) {
 
     const appearsInTitleOrArtists = collaborationKeywords.some(keyword => trackNameLowerCase.includes(keyword)) || isFeaturedArtist;
     const isNotAlbumArtist = mainArtistNameLowerCase !== artistNameLowerCase;
-    const isExactMatch = trackNameLowerCase.includes(artistNameLowerCase);
 
-    return appearsInTitleOrArtists && isNotAlbumArtist && isExactMatch;
+    return appearsInTitleOrArtists && isNotAlbumArtist;
   });
 
   const uniqueTracks = Array.from(new Set(filteredTracks.map(JSON.stringify))).map(JSON.parse);
