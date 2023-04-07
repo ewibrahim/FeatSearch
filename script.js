@@ -12,7 +12,7 @@ async function getAccessToken() {
 
 async function searchFeaturedTracks(artistName) {
   const query = `"${artistName}"`;
-  let tracks = await search(query, 'track', 400);
+  let tracks = await search(query, 'track', 2000);
   const artistNameLowerCase = artistName.toLowerCase();
 
   tracks = tracks.filter(track => {
