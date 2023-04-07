@@ -11,40 +11,48 @@ async function getAccessToken() {
 }
 
 async function searchFeaturedTracks(artistName) {
-  const query = `"${artistName}"`;
-  let tracks = await search(query, 'track', 1000);
   const artistNameLowerCase = artistName.toLowerCase();
+  const collaborationKeywords = [
+    `feat. ${artistNameLowerCase}`,
+    `ft. ${artistNameLowerCase}`,
+    `featuring ${artistNameLowerCase}`,
+    `with ${artistNameLowerCase}`,
+    `presenting ${artistNameLowerCase}`,
+    `introducing ${artistNameLowerCase}`,
+  ];
 
-  tracks = tracks.filter(track => {
+  const allTracks = [];
+
+  for (const keyword of collaborationKeywords) {
+    const tracks = await search(keyword, 'track', 1000);
+    allTracks.push(...tracks);
+  }
+
+  const filteredTracks = allTracks.filter(track => {
     const trackNameLowerCase = track.name.toLowerCase();
     const mainArtistNameLowerCase = track.artists[0].name.toLowerCase();
-
-    const isFeaturedInTrackName = trackNameLowerCase.includes(`feat. ${artistNameLowerCase}`) ||
-                                   trackNameLowerCase.includes(`ft. ${artistNameLowerCase}`) ||
-                                   trackNameLowerCase.includes(`featuring ${artistNameLowerCase}`) ||
-                                   trackNameLowerCase.includes(`with ${artistNameLowerCase}`) ||
-                                   trackNameLowerCase.includes(`presenting ${artistNameLowerCase}`) ||
-                                   trackNameLowerCase.includes(`introducing ${artistNameLowerCase}`);
 
     const isFeaturedArtist = track.artists.some((artist, index) => {
       const artistNameInListLowerCase = artist.name.toLowerCase();
       return artistNameInListLowerCase === artistNameLowerCase && index !== 0;
     });
 
-    const appearsInTitleOrArtists = isFeaturedInTrackName || isFeaturedArtist;
+    const appearsInTitleOrArtists = collaborationKeywords.some(keyword => trackNameLowerCase.includes(keyword)) || isFeaturedArtist;
     const isNotAlbumArtist = mainArtistNameLowerCase !== artistNameLowerCase;
 
-    // Only include tracks that satisfy both conditions
     return appearsInTitleOrArtists && isNotAlbumArtist;
   });
 
-  return tracks.sort((b, a) => new Date(a.album.release_date) - new Date(b.album.release_date));
+  const uniqueTracks = Array.from(new Set(filteredTracks.map(JSON.stringify))).map(JSON.parse);
+  const sortedTracks = uniqueTracks.sort((b, a) => new Date(a.album.release_date) - new Date(b.album.release_date));
+
+  return sortedTracks;
 }
 
 async function search(query, type, limit = 50) {
   let allItems = [];
   let currentPage = 0;
-  const maxItems = Math.min(limit, 1000); // Keep a reasonable maximum to avoid too many requests
+  const maxItems = Math.min(limit, 1000); // Modify the maximum limit to 1000
 
   while (allItems.length < maxItems) {
     const currentOffset = currentPage * 50;
