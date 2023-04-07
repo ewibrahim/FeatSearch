@@ -10,28 +10,32 @@ async function getAccessToken() {
   accessToken = data.access_token;
 }
 
-
 async function searchFeaturedTracks(artistName) {
   const query = `"${artistName}"`;
-  let tracks = await search(query, 'track', 400);
+  let tracks = await search(query, 'track');
   const artistNameLowerCase = artistName.toLowerCase();
 
   tracks = tracks.filter(track => {
     const trackNameLowerCase = track.name.toLowerCase();
     const mainArtistNameLowerCase = track.artists[0].name.toLowerCase();
-    const isFeaturedInName = trackNameLowerCase.includes(`feat. ${artistNameLowerCase}`) ||
-                             trackNameLowerCase.includes(`ft. ${artistNameLowerCase}`) ||
-                             trackNameLowerCase.includes(`featuring ${artistNameLowerCase}`) ||
-                             trackNameLowerCase.includes(`with ${artistNameLowerCase}`) ||
-                             trackNameLowerCase.includes(`presenting ${artistNameLowerCase}`) ||
-                             trackNameLowerCase.includes(`introducing ${artistNameLowerCase}`);
 
-    // Check if the given artist is among the artists of the track and not the main artist
-    const isFeaturedArtist = track.artists.some(
-      (artist, index) => artist.name.toLowerCase() === artistNameLowerCase && index > 0
-    );
+    const isFeaturedInTrackName = trackNameLowerCase.includes(`feat. ${artistNameLowerCase}`) ||
+                                   trackNameLowerCase.includes(`ft. ${artistNameLowerCase}`) ||
+                                   trackNameLowerCase.includes(`featuring ${artistNameLowerCase}`) ||
+                                   trackNameLowerCase.includes(`with ${artistNameLowerCase}`) ||
+                                   trackNameLowerCase.includes(`presenting ${artistNameLowerCase}`) ||
+                                   trackNameLowerCase.includes(`introducing ${artistNameLowerCase}`);
 
-    return isFeaturedInName && isFeaturedArtist;
+    const isFeaturedArtist = track.artists.some((artist, index) => {
+      const artistNameInListLowerCase = artist.name.toLowerCase();
+      return artistNameInListLowerCase === artistNameLowerCase && index !== 0;
+    });
+
+    const appearsInTitleOrArtists = isFeaturedInTrackName || isFeaturedArtist;
+    const isNotAlbumArtist = mainArtistNameLowerCase !== artistNameLowerCase;
+
+    // Only include tracks that satisfy both conditions
+    return appearsInTitleOrArtists && isNotAlbumArtist;
   });
 
   return tracks.sort((b, a) => new Date(a.album.release_date) - new Date(b.album.release_date));
