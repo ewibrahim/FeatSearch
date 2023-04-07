@@ -44,7 +44,7 @@ async function searchFeaturedTracks(artistName) {
 async function search(query, type, limit = 50) {
   let allItems = [];
   let currentPage = 0;
-  const maxItems = Math.min(limit, 400); // Keep a reasonable maximum to avoid too many requests
+  const maxItems = Math.min(limit, 2000); // Keep a reasonable maximum to avoid too many requests
 
   while (allItems.length < maxItems) {
     const currentOffset = currentPage * 50;
