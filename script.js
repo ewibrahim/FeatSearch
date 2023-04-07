@@ -12,7 +12,7 @@ async function getAccessToken() {
 
 async function searchFeaturedTracks(artistName) {
   const query = `"${artistName}"`;
-  let tracks = await search(query, 'track', 2000);
+  let tracks = await search(query, 'track', 1000);
   const artistNameLowerCase = artistName.toLowerCase();
 
   tracks = tracks.filter(track => {
@@ -44,7 +44,7 @@ async function searchFeaturedTracks(artistName) {
 async function search(query, type, limit = 50) {
   let allItems = [];
   let currentPage = 0;
-  const maxItems = Math.min(limit, 2000); // Keep a reasonable maximum to avoid too many requests
+  const maxItems = Math.min(limit, 1000); // Keep a reasonable maximum to avoid too many requests
 
   while (allItems.length < maxItems) {
     const currentOffset = currentPage * 50;
