@@ -28,7 +28,7 @@ async function searchFeaturedTracks(artistName) {
         isExactFeaturedArtist
       );
     })
-    .sort((b, a) => new Date(b.album.release_date) - new Date(a.album.release_date));
+    .sort((a, b) => new Date(b.album.release_date) - new Date(a.album.release_date));
 
   return filteredTracks;
 }
