@@ -44,7 +44,7 @@ async function searchFeaturedTracks(artistName) {
 }
 
 async function getAlbumTracks(albumId) {
-  const response = await fetchWithRateLimiting(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
+  const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
@@ -55,18 +55,6 @@ async function getAlbumTracks(albumId) {
   return data.items;
 }
 
-async function fetchWithRateLimiting(url, options) {
-  let response = await fetch(url, options);
-  let retryAfter = 0;
-
-  while (response.status === 429) {
-    retryAfter = parseInt(response.headers.get('Retry-After')) || 1;
-    await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
-    response = await fetch(url, options);
-  }
-
-  return response;
-}
 
 async function search(query, type, limit = 50) {
   let allItems = [];
