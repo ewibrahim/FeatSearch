@@ -11,48 +11,23 @@ async function getAccessToken() {
 }
 
 async function searchFeaturedTracks(artistName) {
+  const tracks = await search(artistName, 'track', 1000);
+
   const artistNameLowerCase = artistName.toLowerCase();
 
-  const trackSearchResults = await search(artistName, 'track', 1000);
-  const albumSearchResults = await search(artistName, 'album', 1000);
-  
-  const allTracks = [];
-  
-  for (const album of albumSearchResults) {
-    const albumTracks = await getAlbumTracks(album.id);
-    allTracks.push(...albumTracks);
-  }
+  const filteredTracks = tracks.filter((track) => {
+    const mainArtistNameLowerCase = track.artists[0].name.toLowerCase();
+    const featuredArtists = track.artists.slice(1);
+    const isExactFeaturedArtist = featuredArtists.some(
+      (artist) => artist.name.toLowerCase() === artistNameLowerCase
+    );
 
-  const combinedTracks = [...trackSearchResults, ...allTracks];
-
-  const filteredTracks = combinedTracks
-    .filter((track) => {
-      const mainArtistNameLowerCase = track.artists[0].name.toLowerCase();
-      const featuredArtists = track.artists.slice(1);
-      const isExactFeaturedArtist = featuredArtists.some(
-        (artist) => artist.name.toLowerCase() === artistNameLowerCase
-      );
-
-      return (
-        mainArtistNameLowerCase !== artistNameLowerCase &&
-        isExactFeaturedArtist
-      );
-    })
-    .sort((a, b) => new Date(b.album.release_date) - new Date(a.album.release_date));
-
-  return filteredTracks;
-}
-
-async function getAlbumTracks(albumId) {
-  const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    return (
+      mainArtistNameLowerCase !== artistNameLowerCase && isExactFeaturedArtist
+    );
   });
 
-  const data = await response.json();
-
-  return data.items;
+  return filteredTracks;
 }
 
 
