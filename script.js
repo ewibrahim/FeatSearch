@@ -114,3 +114,33 @@ async function performSearch(event) {
 
 function displayResults(tracks) {
   const resultsElement = document.getElementById("results");
+  resultsElement.innerHTML = "";
+
+  if (tracks.length === 0) {
+    const noResultsElement = document.createElement("p");
+    noResultsElement.textContent = "Aucun résultat trouvé.";
+    resultsElement.appendChild(noResultsElement);
+    return;
+  }
+
+  const resultList = document.createElement("ol");
+  tracks.forEach((track) => {
+    const listItem = document.createElement("li");
+    listItem.textContent = `${track.artist} - ${track.title} (${track.releaseDate})`;
+    resultList.appendChild(listItem);
+  });
+
+  resultsElement.appendChild(resultList);
+}
+
+(async () => {
+  try {
+    accessToken = await getAccessToken();
+  } catch (error) {
+    console.error(error);
+  }
+
+  const searchForm = document.getElementById("search-form");
+  searchForm.addEventListener("submit", performSearch);
+})();
+
