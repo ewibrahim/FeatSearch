@@ -11,11 +11,21 @@ async function getAccessToken() {
 }
 
 async function searchFeaturedTracks(artistName) {
-  const tracks = await search(artistName, 'track', 2000);
-
   const artistNameLowerCase = artistName.toLowerCase();
 
-  const filteredTracks = tracks
+  const trackSearchResults = await search(artistName, 'track', 1000);
+  const albumSearchResults = await search(artistName, 'album', 1000);
+  
+  const allTracks = [];
+  
+  for (const album of albumSearchResults) {
+    const albumTracks = await getAlbumTracks(album.id);
+    allTracks.push(...albumTracks);
+  }
+
+  const combinedTracks = [...trackSearchResults, ...allTracks];
+
+  const filteredTracks = combinedTracks
     .filter((track) => {
       const mainArtistNameLowerCase = track.artists[0].name.toLowerCase();
       const featuredArtists = track.artists.slice(1);
@@ -32,6 +42,19 @@ async function searchFeaturedTracks(artistName) {
 
   return filteredTracks;
 }
+
+async function getAlbumTracks(albumId) {
+  const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const data = await response.json();
+
+  return data.items;
+}
+
 
 async function search(query, type, limit = 50) {
   let allItems = [];
