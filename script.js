@@ -11,43 +11,23 @@ async function getAccessToken() {
 }
 
 async function searchFeaturedTracks(artistName) {
+  const tracks = await search(artistName, 'track', 2000);
+
   const artistNameLowerCase = artistName.toLowerCase();
-  const collaborationKeywords = [
-    `feat. ${artistNameLowerCase}`,
-    `ft. ${artistNameLowerCase}`,
-    `featuring ${artistNameLowerCase}`,
-    `with ${artistNameLowerCase}`,
-    `presenting ${artistNameLowerCase}`,
-    `introducing ${artistNameLowerCase}`,
-  ];
 
-  const allTracks = [];
-
-  for (const keyword of collaborationKeywords) {
-    const combinedQuery = `"${keyword}" AND "${artistName}"`;
-    const tracks = await search(combinedQuery, 'track', 1000);
-    allTracks.push(...tracks);
-  }
-
-  const filteredTracks = allTracks.filter(track => {
-    const trackNameLowerCase = track.name.toLowerCase();
+  const filteredTracks = tracks.filter((track) => {
     const mainArtistNameLowerCase = track.artists[0].name.toLowerCase();
+    const featuredArtists = track.artists.slice(1);
+    const isExactFeaturedArtist = featuredArtists.some(
+      (artist) => artist.name.toLowerCase() === artistNameLowerCase
+    );
 
-    const isFeaturedArtist = track.artists.some((artist, index) => {
-      const artistNameInListLowerCase = artist.name.toLowerCase();
-      return artistNameInListLowerCase === artistNameLowerCase && index !== 0;
-    });
-
-    const appearsInTitleOrArtists = collaborationKeywords.some(keyword => trackNameLowerCase.includes(keyword)) || isFeaturedArtist;
-    const isNotAlbumArtist = mainArtistNameLowerCase !== artistNameLowerCase;
-
-    return appearsInTitleOrArtists && isNotAlbumArtist;
+    return (
+      mainArtistNameLowerCase !== artistNameLowerCase && isExactFeaturedArtist
+    );
   });
 
-  const uniqueTracks = Array.from(new Set(filteredTracks.map(JSON.stringify))).map(JSON.parse);
-  const sortedTracks = uniqueTracks.sort((b, a) => new Date(a.album.release_date) - new Date(b.album.release_date));
-
-  return sortedTracks;
+  return filteredTracks;
 }
 
 
