@@ -11,25 +11,27 @@ async function getAccessToken() {
 }
 
 async function searchFeaturedTracks(artistName) {
-  const tracks = await search(artistName, 'track', 1000);
+  const tracks = await search(artistName, 'track', 2000);
 
   const artistNameLowerCase = artistName.toLowerCase();
 
-  const filteredTracks = tracks.filter((track) => {
-    const mainArtistNameLowerCase = track.artists[0].name.toLowerCase();
-    const featuredArtists = track.artists.slice(1);
-    const isExactFeaturedArtist = featuredArtists.some(
-      (artist) => artist.name.toLowerCase() === artistNameLowerCase
-    );
+  const filteredTracks = tracks
+    .filter((track) => {
+      const mainArtistNameLowerCase = track.artists[0].name.toLowerCase();
+      const featuredArtists = track.artists.slice(1);
+      const isExactFeaturedArtist = featuredArtists.some(
+        (artist) => artist.name.toLowerCase() === artistNameLowerCase
+      );
 
-    return (
-      mainArtistNameLowerCase !== artistNameLowerCase && isExactFeaturedArtist
-    );
-  });
+      return (
+        mainArtistNameLowerCase !== artistNameLowerCase &&
+        isExactFeaturedArtist
+      );
+    })
+    .sort((b, a) => new Date(b.album.release_date) - new Date(a.album.release_date));
 
   return filteredTracks;
 }
-
 
 async function search(query, type, limit = 50) {
   let allItems = [];
